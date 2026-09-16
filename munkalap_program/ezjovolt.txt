@@ -1,0 +1,290 @@
+import 'dart:typed_data';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+import 'package:signature/signature.dart';
+
+void main() {
+  runApp(const MunkalapApp());
+}
+
+class MunkalapApp extends StatelessWidget {
+  const MunkalapApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'DR Industrie - Digitális Munkalap',
+      theme: ThemeData(primarySwatch: Colors.deepOrange, useMaterial3: true),
+      home: const MunkalapFormScreen(),
+    );
+  }
+}
+
+class MunkalapFormScreen extends StatefulWidget {
+  const MunkalapFormScreen({super.key});
+
+  @override
+  State<MunkalapFormScreen> createState() => _MunkalapFormScreenState();
+}
+
+class _MunkalapFormScreenState extends State<MunkalapFormScreen> {
+  final _formKey = GlobalKey<FormState>();
+
+  final TextEditingController _driSzamController = TextEditingController(text: '001 TESZT');
+  final TextEditingController _ugyfelController = TextEditingController(text: 'Kovács István TESZT');
+  final TextEditingController _helyszinController = TextEditingController(text: 'Miskolc, Szondi György u. 5. TESZT');
+  final TextEditingController _gepController = TextEditingController(text: 'CAT 320 Mark II TESZT');
+  final TextEditingController _idotartamController = TextEditingController(text: '4.5 óra TESZT');
+  final TextEditingController _kmController = TextEditingController(text: '128 km TESZT');
+  final TextEditingController _elvegzettMunkaController = TextEditingController(
+    text: 'Hidraulika cső cseréje, rendszernyomás ellenőrzése és tesztüzem elvégzése. TESZT',
+  );
+  final TextEditingController _hibaLeirasController = TextEditingController(
+    text: 'A főszivattyúnál szivárgás tapasztalható. Javasolt a tömítés cseréje a következő szerviznél. TESZT',
+  );
+  final TextEditingController _datumController = TextEditingController(
+    text: 'Miskolc, ${DateTime.now().year}.${DateTime.now().month}.${DateTime.now().day}. TESZT',
+  );
+
+  final SignatureController _ugyfelSigController = SignatureController(
+    penStrokeWidth: 3,
+    penColor: Colors.black,
+    exportBackgroundColor: Colors.transparent,
+  );
+  final SignatureController _szervizSigController = SignatureController(
+    penStrokeWidth: 3,
+    penColor: Colors.black,
+    exportBackgroundColor: Colors.transparent,
+  );
+
+  Future<Uint8List> _generatePdf() async {
+    final pdf = pw.Document();
+
+    final ttfBase = await PdfGoogleFonts.robotoRegular();
+    final ttfBold = await PdfGoogleFonts.robotoBold();
+
+    final ByteData bgData = await rootBundle.load('assets/sablon.png');
+    final Uint8List bgBytes = bgData.buffer.asUint8List();
+    final pw.ImageProvider bgImage = pw.MemoryImage(bgBytes);
+
+    final Uint8List? ugyfelBytes = await _ugyfelSigController.toPngBytes();
+    final Uint8List? szervizBytes = await _szervizSigController.toPngBytes();
+    final pw.ImageProvider? ugyfelImg = ugyfelBytes != null ? pw.MemoryImage(ugyfelBytes) : null;
+    final pw.ImageProvider? szervizImg = szervizBytes != null ? pw.MemoryImage(szervizBytes) : null;
+
+    pdf.addPage(
+      pw.Page(
+        theme: pw.ThemeData(
+          defaultTextStyle: pw.TextStyle(font: ttfBase),
+        ).copyWith(
+          paragraphStyle: pw.TextStyle(font: ttfBase),
+        ),
+        pageFormat: PdfPageFormat.a4,
+        margin: pw.EdgeInsets.zero,
+        build: (pw.Context context) {
+          return pw.Stack(
+            children: [
+              pw.Positioned.fill(
+                child: pw.Image(bgImage, fit: pw.BoxFit.cover),
+              ),
+
+              pw.Positioned(
+                left: 710,
+                top: 55,
+                child: pw.Text(_driSzamController.text, style: pw.TextStyle(font: ttfBold, fontSize: 11, fontWeight: pw.FontWeight.bold)),
+              ),
+
+              pw.Positioned(
+                left: 140,
+                top: 136,
+                child: pw.Text(_ugyfelController.text, style: pw.TextStyle(font: ttfBase, fontSize: 10)),
+              ),
+
+              pw.Positioned(
+                left: 225,
+                top: 170,
+                child: pw.Text(_helyszinController.text, style: pw.TextStyle(font: ttfBase, fontSize: 10)),
+              ),
+
+              pw.Positioned(
+                left: 175,
+                top: 207,
+                child: pw.Text(_gepController.text, style: pw.TextStyle(font: ttfBase, fontSize: 10)),
+              ),
+
+              pw.Positioned(
+                left: 245,
+                top: 243,
+                child: pw.Text(_idotartamController.text, style: pw.TextStyle(font: ttfBase, fontSize: 10)),
+              ),
+
+              pw.Positioned(
+                left: 190,
+                top: 279,
+                child: pw.Text(_kmController.text, style: pw.TextStyle(font: ttfBase, fontSize: 10)),
+              ),
+
+              pw.Positioned(
+                left: 45,
+                top: 360,
+                child: pw.Container(
+                  width: 500,
+                  height: 95,
+                  child: pw.Text(_elvegzettMunkaController.text, style: pw.TextStyle(font: ttfBase, fontSize: 10)),
+                ),
+              ),
+
+              pw.Positioned(
+                left: 45,
+                top: 500,
+                child: pw.Container(
+                  width: 500,
+                  height: 95,
+                  child: pw.Text(_hibaLeirasController.text, style: pw.TextStyle(font: ttfBase, fontSize: 10)),
+                ),
+              ),
+
+              pw.Positioned(
+                left: 135,
+                top: 610,
+                child: pw.Text(_datumController.text, style: pw.TextStyle(font: ttfBase, fontSize: 10)),
+              ),
+
+              if (ugyfelImg != null)
+                pw.Positioned(
+                  left: 45,
+                  top: 645,
+                  child: pw.Image(ugyfelImg, width: 160, height: 40),
+                ),
+
+              if (szervizImg != null)
+                pw.Positioned(
+                  left: 385,
+                  top: 645,
+                  child: pw.Image(szervizImg, width: 160, height: 40),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+
+    return pdf.save();
+  }
+
+  @override
+  void dispose() {
+    _driSzamController.dispose();
+    _ugyfelController.dispose();
+    _helyszinController.dispose();
+    _gepController.dispose();
+    _idotartamController.dispose();
+    _kmController.dispose();
+    _elvegzettMunkaController.dispose();
+    _hibaLeirasController.dispose();
+    _datumController.dispose();
+    _ugyfelSigController.dispose();
+    _szervizSigController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('DR Industrie - Digitális Munkalap'),
+        backgroundColor: Colors.deepOrange,
+        foregroundColor: Colors.white,
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Text('DRI-', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(width: 8),
+                    Expanded(child: TextFormField(controller: _driSzamController, decoration: const InputDecoration(labelText: 'Munkalap száma', border: OutlineInputBorder()))),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                TextFormField(controller: _ugyfelController, decoration: const InputDecoration(labelText: 'Ügyfél / Customer', border: OutlineInputBorder())),
+                const SizedBox(height: 12),
+                TextFormField(controller: _helyszinController, decoration: const InputDecoration(labelText: 'Munkavégzés helye', border: OutlineInputBorder())),
+                const SizedBox(height: 12),
+                TextFormField(controller: _gepController, decoration: const InputDecoration(labelText: 'Gép típusa', border: OutlineInputBorder())),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(child: TextFormField(controller: _idotartamController, decoration: const InputDecoration(labelText: 'Munkavégzés időtartama', border: OutlineInputBorder()))),
+                    const SizedBox(width: 8),
+                    Expanded(child: TextFormField(controller: _kmController, decoration: const InputDecoration(labelText: 'Megtett km', border: OutlineInputBorder()))),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _elvegzettMunkaController,
+                  maxLines: 6,
+                  keyboardType: TextInputType.multiline,
+                  decoration: const InputDecoration(
+                    labelText: 'Elvégzett munka / Work Performed',
+                    border: OutlineInputBorder(),
+                    alignLabelWithHint: true,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _hibaLeirasController,
+                  maxLines: 6,
+                  keyboardType: TextInputType.multiline,
+                  decoration: const InputDecoration(
+                    labelText: 'Hiba leírása + javaslat',
+                    border: OutlineInputBorder(),
+                    alignLabelWithHint: true,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(controller: _datumController, decoration: const InputDecoration(labelText: 'Hely, dátum / Date', border: OutlineInputBorder())),
+                const SizedBox(height: 16),
+
+                const Text('Ügyfél aláírása:', style: TextStyle(fontWeight: FontWeight.bold)),
+                Container(decoration: BoxDecoration(border: Border.all(color: Colors.grey)), child: Signature(controller: _ugyfelSigController, height: 110, backgroundColor: Colors.grey[100]!)),
+                TextButton(onPressed: () => _ugyfelSigController.clear(), child: const Text('Aláírás törlése')),
+
+                const SizedBox(height: 10),
+                const Text('Szerviz aláírása:', style: TextStyle(fontWeight: FontWeight.bold)),
+                Container(decoration: BoxDecoration(border: Border.all(color: Colors.grey)), child: Signature(controller: _szervizSigController, height: 110, backgroundColor: Colors.grey[100]!)),
+                TextButton(onPressed: () => _szervizSigController.clear(), child: const Text('Aláírás törlése')),
+
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.deepOrange, foregroundColor: Colors.white),
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        final pdfBytes = await _generatePdf();
+                        await Printing.layoutPdf(onLayout: (format) async => pdfBytes);
+                      }
+                    },
+                    icon: const Icon(Icons.picture_as_pdf),
+                    label: const Text('PDF GENERÁLÁS ÉS NYOMTATÁS', style: TextStyle(fontSize: 16)),
+                  ),
+                ),
+                const SizedBox(height: 30),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

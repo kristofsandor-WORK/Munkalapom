@@ -1,0 +1,103 @@
+pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        margin: pw.EdgeInsets.zero,
+        build: (pw.Context context) {
+          return pw.Stack(
+            children: [
+              // HÁTTÉR SABLON KÉP
+              pw.Positioned.fill(
+                child: pw.Image(bgImage, fit: pw.BoxFit.cover),
+              ),
+
+              // DRI Munkalap szám
+              pw.Positioned(
+                left: 710,
+                top: 55,
+                child: pw.Text(_driSzamController.text, style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
+              ),
+
+              // Ügyfél / Customer (JÓ)
+              pw.Positioned(
+                left: 140,
+                top: 138,
+                child: pw.Text(_ugyfelController.text, style: const pw.TextStyle(fontSize: 10)),
+              ),
+
+              // Munkavégzés helye / Location of work (JÓ)
+              pw.Positioned(
+                left: 225,
+                top: 172,
+                child: pw.Text(_helyszinController.text, style: const pw.TextStyle(fontSize: 10)),
+              ),
+
+              // Gép típusa / Type of machine (KICSIT FELJEBB)
+              pw.Positioned(
+                left: 175,
+                top: 209,
+                child: pw.Text(_gepController.text, style: const pw.TextStyle(fontSize: 10)),
+              ),
+
+              // Munkavégzés időtartama / Duration of work (KICSIT FELJEBB)
+              pw.Positioned(
+                left: 245,
+                top: 245,
+                child: pw.Text(_idotartamController.text, style: const pw.TextStyle(fontSize: 10)),
+              ),
+
+              // Megtett km / Traveled distance (KICSIT FELJEBB)
+              pw.Positioned(
+                left: 190,
+                top: 281,
+                child: pw.Text(_kmController.text, style: const pw.TextStyle(fontSize: 10)),
+              ),
+
+              // Elvégzett munka (JÓ)
+              pw.Positioned(
+                left: 45,
+                top: 360,
+                child: pw.Container(
+                  width: 500,
+                  height: 95,
+                  child: pw.Text(_elvegzettMunkaController.text, style: const pw.TextStyle(fontSize: 10)),
+                ),
+              ),
+
+              // Hiba leírása + javaslat (JÓ)
+              pw.Positioned(
+                left: 45,
+                top: 500,
+                child: pw.Container(
+                  width: 500,
+                  height: 95,
+                  child: pw.Text(_hibaLeirasController.text, style: const pw.TextStyle(fontSize: 10)),
+                ),
+              ),
+
+              // Hely, dátum (KICSIT FELJEBB)
+              pw.Positioned(
+                left: 135,
+                top: 611,
+                child: pw.Text(_datumController.text, style: const pw.TextStyle(fontSize: 10)),
+              ),
+
+              // Ügyfél aláírása (JÓ)
+              if (ugyfelImg != null)
+                pw.Positioned(
+                  left: 45,
+                  top: 670,
+                  child: pw.Image(ugyfelImg, width: 160, height: 45),
+                ),
+
+              // Szerviz aláírása (1 BETŰNYIVEL JOBRÁBB)
+              if (szervizImg != null)
+                pw.Positioned(
+                  left: 385,
+                  top: 670,
+                  child: pw.Image(szervizImg, width: 160, height: 45),
+                ),
+            ],
+          );
+        },
+      ),
+    );

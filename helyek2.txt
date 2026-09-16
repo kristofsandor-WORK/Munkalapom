@@ -1,0 +1,111 @@
+    pdf.addPage(
+      pw.Page(
+        theme: pw.ThemeData(
+          defaultTextStyle: pw.TextStyle(font: ttfBase),
+        ).copyWith(
+          paragraphStyle: pw.TextStyle(font: ttfBase),
+        ),
+        pageFormat: PdfPageFormat.a4,
+        margin: pw.EdgeInsets.zero,
+        build: (pw.Context context) {
+          return pw.Stack(
+            children: [
+              // HÁTTÉR SABLON KÉP
+              pw.Positioned.fill(
+                child: pw.Image(bgImage, fit: pw.BoxFit.cover),
+              ),
+
+              // DRI Munkalap szám
+              pw.Positioned(
+                left: 710,
+                top: 55,
+                child: pw.Text(_driSzamController.text, style: pw.TextStyle(font: ttfBold, fontSize: 11, fontWeight: pw.FontWeight.bold)),
+              ),
+
+              // Ügyfél / Customer 
+              pw.Positioned(
+                left: 140,
+                top: 136,
+                child: pw.Text(_ugyfelController.text, style: pw.TextStyle(font: ttfBase, fontSize: 10)),
+              ),
+
+              // Munkavégzés helye / Location of work
+              pw.Positioned(
+                left: 225,
+                top: 172,
+                child: pw.Text(_helyszinController.text, style: pw.TextStyle(font: ttfBase, fontSize: 10)),
+              ),
+              
+              // Gép típusa / Type of machine 
+              pw.Positioned(
+                left: 180,
+                top: 209,
+                child: pw.Text(_gepController.text, style: pw.TextStyle(font: ttfBase, fontSize: 10)),
+              ),
+
+              // Munkavégzés időtartama / Duration of work 
+              pw.Positioned(
+                left: 245,
+                top: 243,
+                child: pw.Text(_idotartamController.text, style: pw.TextStyle(font: ttfBase, fontSize: 10)),
+              ),
+
+              // Megtett km / Traveled distance 
+              pw.Positioned(
+                left: 190,
+                top: 279,
+                child: pw.Text(_kmController.text, style: pw.TextStyle(font: ttfBase, fontSize: 10)),
+              ),
+
+              // Elvégzett munka 
+              pw.Positioned(
+                left: 45,
+                top: 360,
+                child: pw.Container(
+                  width: 500,
+                  height: 95,
+                  child: pw.Text(_elvegzettMunkaController.text, style: pw.TextStyle(font: ttfBase, fontSize: 10)),
+                ),
+              ),
+
+              // Hiba leírása + javaslat
+              pw.Positioned(
+                left: 45,
+                top: 500,
+                child: pw.Container(
+                  width: 500,
+                  height: 95,
+                  child: pw.Text(_hibaLeirasController.text, style: pw.TextStyle(font: ttfBase, fontSize: 10)),
+                ),
+              ),
+
+              // Hely, dátum
+              pw.Positioned(
+                left: 135,
+                top: 610,
+                child: pw.Text(_datumController.text, style: pw.TextStyle(font: ttfBase, fontSize: 10)),
+              ),
+
+              // Ügyfél aláírása
+              if (ugyfelImg != null)
+                pw.Positioned(
+                  left: 45,
+                  top: 645,
+                  child: pw.Image(ugyfelImg, width: 160, height: 40),
+                ),
+
+              // Szerviz aláírása
+              if (szervizImg != null)
+                pw.Positioned(
+                  left: 385,
+                  top: 645,
+                  child: pw.Image(szervizImg, width: 160, height: 40),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+
+    return pdf.save();
+  }
